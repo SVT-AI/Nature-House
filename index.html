@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Czerwone Łąki • Domek blisko Kazimierza Dolnego</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+
+:root{
+  --forest-dark:#2f3e2f;
+  --forest-mid:#4e6f50;
+  --forest-light:#e8ede6;
+  --beige:#f5f3ee;
+  --text:#2a2a2a;
+  --radius:18px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:var(--beige);
+  color:var(--text);
+  line-height:1.7;
+}
+
+/* HEADER */
+
+header{
+  position:sticky;
+  top:0;
+  z-index:999;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem 2rem;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid #ddd;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand img{
+  width:36px;
+}
+
+nav{
+  display:flex;
+  gap:1.2rem;
+}
+
+nav a{
+  text-decoration:none;
+  color:var(--forest-dark);
+  font-weight:500;
+}
+
+nav a:hover{
+  text-decoration:underline;
+}
+
+.lang-switch{
+  display:flex;
+  gap:8px;
+}
+
+.lang-btn{
+  border:none;
+  background:var(--forest-mid);
+  color:white;
+  padding:.55rem 1rem;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* HERO */
+
+.hero{
+  max-width:1200px;
+  margin:auto;
+  padding:5rem 2rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:3rem;
+  align-items:center;
+}
+
+.hero img{
+  width:100%;
+  border-radius:var(--radius);
+  box-shadow:0 12px 40px rgba(0,0,0,.18);
+}
+
+h1{
+  font-family:"Playfair Display",serif;
+  font-size:3.3rem;
+  line-height:1.1;
+  color:var(--forest-dark);
+}
+
+.hero-sub{
+  color:#555;
+  margin-bottom:1rem;
+}
+
+.btn{
+  display:inline-block;
+  background:var(--forest-mid);
+  color:white;
+  text-decoration:none;
+  padding:1rem 2rem;
+  border-radius:12px;
+  margin-top:1rem;
+  font-weight:600;
+}
+
+.btn:hover{
+  opacity:.92;
+}
+
+/* SECTION */
+
+section{
+  max-width:1100px;
+  margin:auto;
+  padding:4rem 2rem;
+}
+
+h2{
+  font-family:"Playfair Display",serif;
+  color:var(--forest-dark);
+  font-size:2.4rem;
+}
+
+.section-sub{
+  color:#666;
+  max-width:700px;
+}
+
+/* BOX */
+
+.feature-box,
+.review-card,
+.price-box,
+.calendar-box,
+.weather-live,
+.attraction-card,
+.railway-box{
+  background:white;
+  padding:2rem;
+  border-radius:var(--radius);
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+/* GALLERY */
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1rem;
+}
+
+.gallery img{
+  width:100%;
+  height:280px;
+  object-fit:cover;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:.3s;
+}
+
+.gallery img:hover{
+  transform:scale(1.02);
+}
+
+/* LIGHTBOX */
+
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.94);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:99999;
+}
+
+.lightbox.active{
+  display:flex;
+}
+
+.lightbox img{
+  max-width:92%;
+  max-height:90vh;
+  border-radius:14px;
+}
+
+.lightbox-close{
+  position:absolute;
+  top:30px;
+  right:40px;
+  color:white;
+  font-size:2rem;
+  cursor:pointer;
+}
+
+/* REVIEWS */
+
+.reviews-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+}
+
+/* WEATHER */
+
+.weather-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+}
+
+.weather-item{
+  background:var(--forest-light);
+  padding:1rem;
+  border-radius:12px;
+  text-align:center;
+}
+
+/* MAP */
+
+#attractionsMap{
+  height:650px;
+  border-radius:16px;
+  overflow:hidden;
+  margin-top:2rem;
+}
+
+/* FORM */
+
+form input,
+form textarea{
+  width:100%;
+  padding:1rem;
+  margin-bottom:1rem;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+footer{
+  background:var(--forest-light);
+  text-align:center;
+  padding:2rem;
+  margin-top:4rem;
+}
+
+@media(max-width:900px){
+
+.hero,
+.gallery,
+.reviews-grid,
+.weather-grid{
+  grid-template-columns:1fr;
+}
+
+header{
+  flex-direction:column;
+  gap:1rem;
+}
+
+nav{
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="brand">
+<img src="logo-czerwone-laki.svg" alt="Logo">
+<strong>Czerwone Łąki</strong>
+</div>
+
+<nav>
+<a href="#o-domku">O domku</a>
+<a href="#galeria">Galeria</a>
+<a href="#atrakcje">Atrakcje</a>
+<a href="#opinie">Opinie</a>
+<a href="#kontakt">Kontakt</a>
+</nav>
+
+<div class="lang-switch">
+<button class="lang-btn">PL</button>
+<button class="lang-btn">ENG</button>
+<button class="lang-btn">DE</button>
+</div>
+
+</header>
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div>
+
+<h1>Domek w sercu natury<br>blisko Kazimierza Dolnego</h1>
+
+<p class="hero-sub">
+Prywatna działka o powierzchni 0,7 ha z własnym fragmentem lasu,
+pełną prywatnością i domkiem do wyłącznej dyspozycji gości.
+</p>
+
+<p class="hero-sub">
+Idealne miejsce na spokojny odpoczynek blisko Wisły,
+Kazimierza Dolnego i tras rowerowych.
+</p>
+
+<a href="#kontakt" class="btn">
+Zarezerwuj pobyt
+</a>
+
+</div>
+
+<img
+src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop"
+loading="lazy"
+alt="Domek">
+
+</section>
+
+<!-- WEATHER -->
+
+<section>
+
+<h2>Aktualna pogoda</h2>
+
+<div class="weather-live">
+
+<div class="weather-grid">
+
+<div class="weather-item">
+<strong>Temperatura</strong>
+<p>15°C</p>
+</div>
+
+<div class="weather-item">
+<strong>Zachmurzenie</strong>
+<p>Duże</p>
+</div>
+
+<div class="weather-item">
+<strong>Wiatr</strong>
+<p>10 km/h</p>
+</div>
+
+<div class="weather-item">
+<strong>Wilgotność</strong>
+<p>70%</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- O DOMKU -->
+
+<section id="o-domku">
+
+<h2>O miejscu</h2>
+
+<div class="feature-box">
+
+<p>
+Czerwone Łąki to kameralny domek położony
+w otoczeniu natury, niedaleko Kazimierza Dolnego.
+</p>
+
+<p>
+Do dyspozycji gości pozostaje cały domek,
+teren rekreacyjny, miejsce na ognisko
+oraz prywatny fragment lasu.
+</p>
+
+<p>
+Duża działka zapewnia ciszę i prywatność —
+idealne warunki do odpoczynku przez cały rok.
+</p>
+
+</div>
+
+</section>
+
+<!-- GALLERY -->
+
+<section id="galeria">
+
+<h2>Galeria</h2>
+
+<div class="gallery">
+
+<img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+<img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+<img src="https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+<img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+<img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+<img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop" loading="lazy">
+
+</div>
+
+</section>
+
+<!-- ATRAKCJE -->
+
+<section id="atrakcje">
+
+<h2>Atrakcje okolicy</h2>
+
+<div class="feature-box">
+
+<p>
+W okolicy znajdują się:
+</p>
+
+<ul>
+
+<li>Kazimierz Dolny</li>
+<li>Wisła i nadwiślańskie spacery</li>
+<li>Baszta i ruiny zamku</li>
+<li>Wąwóz Korzeniowy Dół</li>
+<li>Mięćmierz</li>
+<li>Prom do Janowca</li>
+<li>Zamek w Janowcu</li>
+<li>Trasy rowerowe i lessowe wąwozy</li>
+<li>Nadwiślańska Kolejka Wąskotorowa</li>
+
+</ul>
+
+</div>
+
+</section>
+
+<!-- MAP -->
+
+<section>
+
+<h2>Mapa atrakcji i tras rowerowych</h2>
+
+<div id="attractionsMap"></div>
+
+</section>
+
+<!-- LEGENDA -->
+
+<section>
+
+<h2>Legenda kazimierskiego koguta</h2>
+
+<div class="feature-box">
+
+<p>
+Według lokalnej legendy w okolicy Kazimierza Dolnego żył diabeł,
+który porywał koguty z gospodarstw.
+</p>
+
+<p>
+Ocalał tylko jeden kogut ukryty
+pośród lessowych wąwozów.
+Od tamtej pory kogut stał się symbolem miasta.
+</p>
+
+</div>
+
+</section>
+
+<!-- OPINIE -->
+
+<section id="opinie">
+
+<h2>Opinie gości</h2>
+
+<div class="reviews-grid">
+
+<div class="review-card">
+
+<strong>Anna • Warszawa</strong>
+
+<p>
+Piękne miejsce, cisza i pełna prywatność.
+Idealny odpoczynek od miasta.
+</p>
+
+</div>
+
+<div class="review-card">
+
+<strong>Piotr • Kraków</strong>
+
+<p>
+Świetna lokalizacja blisko Kazimierza Dolnego.
+Bardzo klimatyczny domek.
+</p>
+
+</div>
+
+<div class="review-card">
+
+<strong>Katarzyna • Gdańsk</strong>
+
+<p>
+Ogromny plus za własny las i bliskość Wisły.
+Na pewno wrócimy.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- KOLEJKA -->
+
+<section>
+
+<h2>Nadwiślańska Kolejka Wąskotorowa</h2>
+
+<div class="railway-box">
+
+<p>
+W niedalekiej odległości znajduje się historyczna kolejka wąskotorowa,
+która prowadzi przez malownicze okolice Lubelszczyzny.
+</p>
+
+<p>
+To jedna z najbardziej klimatycznych atrakcji regionu,
+szczególnie popularna w sezonie letnim.
+</p>
+
+</div>
+
+</section>
+
+<!-- KALENDARZ -->
+
+<section>
+
+<h2>Kalendarz rezerwacji</h2>
+
+<div class="calendar-box">
+
+<iframe
+src="https://calendar.google.com/calendar/embed?src=pl.polish%23holiday%40group.v.calendar.google.com&ctz=Europe%2FWarsaw"
+style="border:0"
+width="100%"
+height="600">
+</iframe>
+
+</div>
+
+</section>
+
+<!-- KONTAKT -->
+
+<section id="kontakt">
+
+<h2>Rezerwacja</h2>
+
+<form action="mailto:tokarskymaciej@gmail.com"
+method="POST"
+enctype="text/plain">
+
+<input type="text" placeholder="Imię" required>
+
+<input type="email" placeholder="E-mail" required>
+
+<input type="date" required>
+
+<input type="date" required>
+
+<textarea rows="5"
+placeholder="Dodatkowe informacje"></textarea>
+
+<button class="btn" type="submit">
+Wyślij rezerwację
+</button>
+
+</form>
+
+</section>
+
+<footer>
+
+© 2026 Czerwone Łąki • Domek blisko Kazimierza Dolnego
+
+</footer>
+
+<!-- LIGHTBOX -->
+
+<div class="lightbox" id="lightbox">
+
+<span class="lightbox-close" id="lightboxClose">
+&times;
+</span>
+
+<img id="lightboxImg">
+
+</div>
+
+<script>
+
+/* LIGHTBOX */
+
+const galleryImages =
+document.querySelectorAll('.gallery img');
+
+const lightbox =
+document.getElementById('lightbox');
+
+const lightboxImg =
+document.getElementById('lightboxImg');
+
+const lightboxClose =
+document.getElementById('lightboxClose');
+
+galleryImages.forEach(img=>{
+
+img.addEventListener('click',()=>{
+
+lightbox.classList.add('active');
+lightboxImg.src = img.src;
+
+});
+
+});
+
+lightboxClose.addEventListener('click',()=>{
+
+lightbox.classList.remove('active');
+
+});
+
+lightbox.addEventListener('click',(e)=>{
+
+if(e.target === lightbox){
+
+lightbox.classList.remove('active');
+
+}
+
+});
+
+/* MAP */
+
+const map = L.map('attractionsMap')
+.setView([51.3225,21.9489],12);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+attribution:'© OpenStreetMap'
+}).addTo(map);
+
+const places = [
+
+{
+name:"Kazimierz Dolny",
+coords:[51.3225,21.9489]
+},
+
+{
+name:"Baszta",
+coords:[51.3216,21.9465]
+},
+
+{
+name:"Zamek",
+coords:[51.3210,21.9460]
+},
+
+{
+name:"Wąwóz Korzeniowy Dół",
+coords:[51.3145,21.9304]
+},
+
+{
+name:"Mięćmierz",
+coords:[51.3350,21.9215]
+},
+
+{
+name:"Prom do Janowca",
+coords:[51.3203,21.9440]
+},
+
+{
+name:"Zamek w Janowcu",
+coords:[51.3237,21.8917]
+},
+
+{
+name:"Kolejka Wąskotorowa",
+coords:[51.3402,22.0161]
+}
+
+];
+
+places.forEach(place=>{
+
+L.marker(place.coords)
+.addTo(map)
+.bindPopup(place.name);
+
+});
+
+/* TRASY */
+
+L.polyline([
+[51.3225,21.9489],
+[51.3300,21.9350],
+[51.3350,21.9215]
+],{
+color:'green',
+weight:5
+}).addTo(map);
+
+L.polyline([
+[51.3225,21.9489],
+[51.3150,21.9300],
+[51.3145,21.9304]
+],{
+color:'blue',
+weight:5
+}).addTo(map);
+
+L.polyline([
+[51.3225,21.9489],
+[51.3237,21.8917]
+],{
+color:'red',
+weight:5
+}).addTo(map);
+
+</script>
+
+</body>
+</html>
